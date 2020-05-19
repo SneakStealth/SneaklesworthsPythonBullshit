@@ -17,7 +17,8 @@
 
 import subprocess #Allows for interfacing with shell and running system commands.
 import optparse #module to allow for parsing from command line. This will let arguments come into play like -h -i -m
-
+import re #fucking regex
+import sys #lol bytes-like strings
 #==================================FUNCTION DEFINITIONS=======================================================
 
 def change_mac(interface, new_mac): #Defines the function to change the mac, so you can use it elsewhere easily
@@ -38,16 +39,23 @@ def get_arguments():
         parser.error("[-] Please specify a MAC address. Use --help for more information.") #Prints the string, and exits
     return options
 
+def mac_search():
+    ip_output = subprocess.check_output(["ip", "link", "show", options.interface]).decode(sys.stdout.encoding)  # I had to think about this. Thanks, mr linux.
+    # print(ip_output)
+    mac_search_result = re.search(r"\w\w:\w\w:\w\w:\w\w:\w\w:\w\w", ip_output)
+
+    if mac_search_result:
+        print(mac_search_result.group(0))
+    else:
+        print("Could not get MAC address")
+
+
 #=====================================STUFF===============================================================
+
 
 options = get_arguments() #Calls get_arguments function
 change_mac(options.interface, options.mac) #Calls the function defined above.
-
-
-ip_output = subprocess.check_output(["ip", "link", "show", options.interface])
-print(ip_output)
-
-
+mac_search()#Cool new way to report the new mac address from the ip command. Might be useful later(TM) Look at the function.
 
 
 #=================================OLD GARBAGE===========================================================
